@@ -7,6 +7,10 @@ from datetime import datetime
 from jd_logger import logger
 from config import global_config
 
+proxies = {
+    "http": "http://child-prc.intel.com:913",
+    "https": "http://child-prc.intel.com:913"
+}
 
 class Timer(object):
     def __init__(self, sleep_interval=0.5):
@@ -28,10 +32,19 @@ class Timer(object):
         从京东服务器获取时间毫秒
         :return:
         """
-        url = 'https://a.jd.com//ajax/queryServerData.html'
-        ret = requests.get(url).text
-        js = json.loads(ret)
-        return int(js["serverTime"])
+        # url = 'https://a.jd.com//ajax/queryServerData.html'
+        url = 'http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp'
+        response = requests.get(url, proxies=proxies)
+
+        if response.status_code == 200:
+            data = response.json()
+            server_time = data.get('data', None)
+            if server_time:
+                return int(server_time['t'])
+            else:
+                print('Could not find server time in response.')
+        else:
+            print('Failed to retrieve server time:', response.status_code)
 
     def local_time(self):
         """

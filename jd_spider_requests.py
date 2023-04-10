@@ -21,6 +21,10 @@ from util import (
     open_image
 )
 
+proxies = {
+    "http": "http://child-prc.intel.com:913",
+    "https": "http://child-prc.intel.com:913"
+}
 
 class SpiderSession:
     """
@@ -31,6 +35,7 @@ class SpiderSession:
         self.user_agent = global_config.getRaw('config', 'DEFAULT_USER_AGENT')
 
         self.session = self._init_session()
+        self.session.proxies = proxies
 
     def _init_session(self):
         session = requests.session()
@@ -220,7 +225,7 @@ class QrLogin:
             'Referer': 'https://passport.jd.com/uc/login?ltype=logout',
         }
 
-        resp = self.session.get(url=url, headers=headers, params={'t': ticket})
+        resp = self.session.get(url=url, headers=headers, params={'t': ticket},)
         if not response_status(resp):
             return False
 
@@ -506,7 +511,7 @@ class JdSeckill(object):
             'Host': 'marathon.jd.com',
         }
         resp = self.session.post(url=url, data=data, headers=headers)
-
+        
         resp_json = None
         try:
             resp_json = parse_json(resp.text)
